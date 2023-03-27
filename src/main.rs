@@ -2,7 +2,7 @@
 //! erasure code an entire block instead of just batches
 //! A shard here is 1280 bytes
 //! the n:k ratio is 2000:2000
-
+// #[macro_use(shards)]
 extern crate solana_reed_solomon_erasure;
 
 use rand::{self, Rng};
@@ -51,13 +51,13 @@ fn main() {
 
     println!("Time elapsed in decode is: {:?} ms", end.as_millis());
 
-    let r = ReedSolomon::new(128, 128).unwrap();
+    let r = ReedSolomon::new(45, 45).unwrap();
 
     // Construct the parity shards
     let mut original = vec![];
-    for _ in 0..256 {
-        let mut elem: [u8; 9800] = [0u8; 9800];
-        for i in 0..9800 {
+    for _ in 0..90 {
+        let mut elem: [u8; 1280] = [0u8; 1280];
+        for i in 0..1280 {
             elem[i] = rand::thread_rng().gen::<u8>()
         }
         original.push(elem.clone());
@@ -76,8 +76,8 @@ fn main() {
     );
 
     let mut recon_shards = shards_into_option_shards(boxed_master_copy.to_vec());
-    for _ in 0..128 {
-        let index = rand::thread_rng().gen_range(0..256);
+    for _ in 0..45 {
+        let index = rand::thread_rng().gen_range(0..90);
         recon_shards[index as usize] = None;
     }
     let start = Instant::now();
