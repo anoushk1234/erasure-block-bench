@@ -2,7 +2,7 @@
 //! erasure code an entire block instead of just batches
 //! A shard here is 1280 bytes
 //! the n:k ratio is 2000:2000
-// #[macro_use(shards)]
+
 extern crate solana_reed_solomon_erasure;
 
 use rand::{self, Rng};
