@@ -25,6 +25,32 @@ fn main() {
     .unwrap();
 
     let end = start.elapsed();
+    let r_start = Instant::now();
+    let recovery = reed_solomon_16::encode(
+        2000,             // total number of original shards
+        2000,             // total number of recovery shards
+        original.clone(), // all original shards
+    )
+    .unwrap();
+    let data_shard_tuple = original
+        .clone()
+        .into_iter()
+        .enumerate()
+        .collect::<Vec<(usize, [u8; 1280])>>();
+    let parity_shard_tuple = recovery
+        .clone()
+        .into_iter()
+        .enumerate()
+        .collect::<Vec<(usize, Vec<u8>)>>();
+    let restored = reed_solomon_16::decode(
+        2000, // total number of original shards
+        2000, // total number of recovery shards
+        data_shard_tuple[0..1000].to_owned(),
+        parity_shard_tuple[0..1000].to_owned(),
+    )
+    .unwrap();
+    let r_end = r_start.elapsed();
     println!("Time elapsed in encode is: {:?} ms", end.as_millis());
+    println!("Time elapsed in decode is: {:?} ms", r_end.as_millis());
     println!("The size of data_shard is: {} bytes", original[0].len());
 }
