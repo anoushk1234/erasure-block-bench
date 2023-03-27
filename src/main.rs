@@ -2,7 +2,7 @@
 //! erasure code an entire block instead of just batches
 //! A shard here is 1280 bytes
 //! the n:k ratio is 2000:2000
-#[macro_use(shards)]
+// #[macro_use(shards)]
 extern crate solana_reed_solomon_erasure;
 
 use rand::{self, Rng};
@@ -18,6 +18,7 @@ fn main() {
         }
         original.push(elem.clone());
     }
+    println!("The size of data_shard is: {} bytes", original[0].len());
     let start = Instant::now();
     let erasure_shards = reed_solomon_16::encode(
         2000,             // total number of original shards
@@ -27,7 +28,7 @@ fn main() {
     .unwrap();
 
     let end = start.elapsed();
-
+    println!("Time elapsed in encode is: {:?} ms", end.as_millis());
     let data_shard_tuple = original
         .clone()
         .into_iter()
@@ -38,7 +39,7 @@ fn main() {
         .into_iter()
         .enumerate()
         .collect::<Vec<(usize, Vec<u8>)>>();
-    let r_start = Instant::now();
+    let start = Instant::now();
     let restored = reed_solomon_16::decode(
         2000, // total number of original shards
         2000, // total number of recovery shards
@@ -46,20 +47,44 @@ fn main() {
         parity_shard_tuple[0..1000].to_owned(),
     )
     .unwrap();
-    let r_end = r_start.elapsed();
-    println!("Time elapsed in encode is: {:?} ms", end.as_millis());
-    println!("Time elapsed in decode is: {:?} ms", r_end.as_millis());
-    println!("The size of data_shard is: {} bytes", original[0].len());
+    let end = start.elapsed();
 
-    // let r = ReedSolomon::new(2000, 2000).unwrap();
+    println!("Time elapsed in decode is: {:?} ms", end.as_millis());
 
-    // // Construct the parity shards
-    // r.encode_shards(
-    //     &mut original
-    //         .clone()
-    //         .into_iter()
-    //         .map(|shard| Box::new(shard))
-    //         .collect::<Box<[u8]>>(),
-    // )
-    // .unwrap();
+    let r = ReedSolomon::new(128, 128).unwrap();
+
+    // Construct the parity shards
+    let mut original = vec![];
+    for _ in 0..256 {
+        let mut elem: [u8; 9800] = [0u8; 9800];
+        for i in 0..9800 {
+            elem[i] = rand::thread_rng().gen::<u8>()
+        }
+        original.push(elem.clone());
+    }
+    let mut boxed_master_copy: Vec<Box<[u8]>> = Vec::default();
+    for i in 0..(original.len()) {
+        boxed_master_copy.push(Box::new(original[i]));
+    }
+
+    let start = Instant::now();
+    r.encode_shards(&mut boxed_master_copy).unwrap();
+    let end = start.elapsed();
+    println!(
+        "Time elapsed in solana encoding is: {:?} ms",
+        end.as_millis()
+    );
+
+    let mut recon_shards = shards_into_option_shards(boxed_master_copy.to_vec());
+    for _ in 0..128 {
+        let index = rand::thread_rng().gen_range(0..256);
+        recon_shards[index as usize] = None;
+    }
+    let start = Instant::now();
+    r.reconstruct_shards(&mut recon_shards).unwrap();
+    let end = start.elapsed();
+    println!(
+        "Time elapsed in solana decoding is: {:?} ms",
+        end.as_millis()
+    );
 }
