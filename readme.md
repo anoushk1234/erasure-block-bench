@@ -16,8 +16,8 @@ Time elapsed in solana decoding is: 43 ms
 **c3.large.x86**
 ```
 The size of data_shard is: 1280 bytes
-Time elapsed in encode is: 33 ms
-Time elapsed in decode is: 58 ms
-Time elapsed in solana encoding is: 11 ms
-Time elapsed in solana decoding is: 12 ms
+Time elapsed in encode is: 32 ms
+Time elapsed in decode is: 57 ms
+Time elapsed in solana encoding is: 10 ms
+Time elapsed in solana decoding is: 13 ms
 ```
