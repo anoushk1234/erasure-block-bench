@@ -1,6 +1,6 @@
 # Erasure Block Bench
 
-A benchmark to see how fast we can erasure code a block with 1D Reed Solomon erasure coding.
+A benchmark to see how fast we can erasure code a block with 1D Reed Solomon erasure coding. SIMD Accelaration is turned off for arm cpus.
 
 ## Benchmakrs
 
