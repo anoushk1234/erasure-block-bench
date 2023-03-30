@@ -51,13 +51,13 @@ fn main() {
 
     println!("Time elapsed in decode is: {:?} ms", end.as_millis());
 
-    let r = ReedSolomon::new(128, 128).unwrap();
+    let r = ReedSolomon::new(45, 45).unwrap();
 
     // Construct the parity shards
     let mut original = vec![];
-    for _ in 0..256 {
-        let mut elem: [u8; 9800] = [0u8; 9800];
-        for i in 0..9800 {
+    for _ in 0..90 {
+        let mut elem: [u8; 1280] = [0u8; 1280];
+        for i in 0..1280 {
             elem[i] = rand::thread_rng().gen::<u8>()
         }
         original.push(elem.clone());
@@ -70,21 +70,46 @@ fn main() {
     let start = Instant::now();
     r.encode_shards(&mut boxed_master_copy).unwrap();
     let end = start.elapsed();
-    println!(
-        "Time elapsed in solana encoding is: {:?} ms",
-        end.as_millis()
-    );
+    println!("Time elapsed in gf8 encoding is: {:?} ms", end.as_millis());
 
     let mut recon_shards = shards_into_option_shards(boxed_master_copy.to_vec());
-    for _ in 0..128 {
-        let index = rand::thread_rng().gen_range(0..256);
+    for _ in 0..45 {
+        let index = rand::thread_rng().gen_range(0..90);
         recon_shards[index as usize] = None;
     }
     let start = Instant::now();
     r.reconstruct_shards(&mut recon_shards).unwrap();
     let end = start.elapsed();
-    println!(
-        "Time elapsed in solana decoding is: {:?} ms",
-        end.as_millis()
-    );
+    println!("Time elapsed in gf8 decoding is: {:?} ms", end.as_millis());
+
+    let r = ReedSolomon::new(128, 128).unwrap();
+
+    // Construct the parity shards
+    let mut original = vec![];
+    for _ in 0..256 {
+        let mut elem: [u8; 1280] = [0u8; 1280];
+        for i in 0..1280 {
+            elem[i] = rand::thread_rng().gen::<u8>()
+        }
+        original.push(elem.clone());
+    }
+    let mut boxed_master_copy: Vec<Box<[u8]>> = Vec::default();
+    for i in 0..(original.len()) {
+        boxed_master_copy.push(Box::new(original[i]));
+    }
+
+    let start = Instant::now();
+    r.encode_shards(&mut boxed_master_copy).unwrap();
+    let end = start.elapsed();
+    println!("Time elapsed in gf8 encoding is: {:?} ms", end.as_millis());
+
+    let mut recon_shards = shards_into_option_shards(boxed_master_copy.to_vec());
+    for _ in 0..128 {
+        let index = rand::thread_rng().gen_range(0..128);
+        recon_shards[index as usize] = None;
+    }
+    let start = Instant::now();
+    r.reconstruct_shards(&mut recon_shards).unwrap();
+    let end = start.elapsed();
+    println!("Time elapsed in gf8 decoding is: {:?} ms", end.as_millis());
 }
