@@ -22,6 +22,14 @@ Time elapsed in gf16 decode is: 57 ms
 Time elapsed in gf8 encoding is: 6 ms
 Time elapsed in gf8 decoding is: 3 ms
 ```
+```
+The size of data_shard is: 20000 bytes
+n:k -> 128:128 (gf8)
+block size is 2.56 MB
+
+Time elapsed in gf8 encoding is: 9 ms
+Time elapsed in gf8 decoding is: 11 ms
+```
 
 **M1 Pro**
 ```

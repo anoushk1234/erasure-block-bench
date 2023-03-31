@@ -111,4 +111,35 @@ fn main() {
     r.reconstruct_shards(&mut recon_shards).unwrap();
     let end = start.elapsed();
     println!("Time elapsed in gf8 decoding is: {:?} ms", end.as_millis());
+
+    let r = ReedSolomon::new(128, 128).unwrap();
+
+    // Construct the parity shards
+    let mut original = vec![];
+    for _ in 0..256 {
+        let mut elem: [u8; 20000] = [0u8; 20000];
+        for i in 0..20000 {
+            elem[i] = rand::thread_rng().gen::<u8>()
+        }
+        original.push(elem.clone());
+    }
+    let mut boxed_master_copy: Vec<Box<[u8]>> = Vec::default();
+    for i in 0..(original.len()) {
+        boxed_master_copy.push(Box::new(original[i]));
+    }
+
+    println!("shard size is 20000 bytes");
+    let start = Instant::now();
+    r.encode_shards(&mut boxed_master_copy).unwrap();
+    let end = start.elapsed();
+    println!("Time elapsed in gf8 encoding is: {:?} ms", end.as_millis());
+    let mut recon_shards = shards_into_option_shards(boxed_master_copy.to_vec());
+    for _ in 0..128 {
+        let index = rand::thread_rng().gen_range(0..128);
+        recon_shards[index as usize] = None;
+    }
+    let start = Instant::now();
+    r.reconstruct_shards(&mut recon_shards).unwrap();
+    let end = start.elapsed();
+    println!("Time elapsed in gf8 decoding is: {:?} ms", end.as_millis());
 }
