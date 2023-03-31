@@ -10,3 +10,8 @@ edition = "2021"
 reed-solomon-16 = "0.1.0"
 rand = "0.8.5"
 solana-reed-solomon-erasure = {version="3.1.1"} # add features=["pure_rust"] if running on arm
+glassbench = "0.3.4"
+
+[[bench]]
+name = "erasure_code_block"
+harness=false
